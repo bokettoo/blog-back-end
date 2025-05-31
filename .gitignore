@@ -1,0 +1,29 @@
+# .gitignore for blog-backend folder
+
+# Environment variables
+.env
+.env.*.local # Exclude .env.development.local, .env.production.local, etc.
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/ # Virtual environment directory
+
+# IDE-specific files
+.idea/ # PyCharm / IntelliJ IDEA
+.vscode/ # VS Code
+*.iml # IntelliJ IDEA module files
+
+# OS generated files
+.DS_Store # macOS
+Thumbs.db # Windows
+ehthumbs.db # Windows
+*.log
+*.sqlite3 # If using SQLite for development/testing
+
+# Database specific (if local DB files are created by ORM/tools)
+*.db

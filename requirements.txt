@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary # PostgreSQL adapter for SQLAlchemy
+pydantic # FastAPI uses Pydantic for data validation
+python-jose[cryptography] # For JWT
+passlib[bcrypt] # For password hashing
+python-dotenv # For loading environment variables
+python-slugify # Added: For generating URL slugs
+pydantic[email] # Added: For email validation
