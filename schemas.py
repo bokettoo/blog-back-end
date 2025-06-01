@@ -1,4 +1,5 @@
 # schemas.py
+
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
@@ -7,34 +8,34 @@ from typing import Optional
 class BlogBase(BaseModel):
     title: str
     content: str
-    excerpt: Optional[str] = None # Added excerpt
+    excerpt: Optional[str] = None
     is_published: bool = False
+    publication_date: Optional[datetime] = None # <--- ADDED: Allow setting publication_date
 
 # For creating new blog posts (includes optional slug if user wants to provide)
 class BlogCreate(BlogBase):
-    slug: Optional[str] = None # Allow providing custom slug, generate if None
+    slug: Optional[str] = None
 
 # For updating existing blog posts
 class BlogUpdate(BlogBase):
-    # All fields are optional for update, so they can be partially updated
     title: Optional[str] = None
     content: Optional[str] = None
     excerpt: Optional[str] = None
     is_published: Optional[bool] = None
     slug: Optional[str] = None
-
+    publication_date: Optional[datetime] = None # <--- ADDED: Allow updating publication_date
 
 # For reading blog posts (includes generated fields like id, dates)
 class Blog(BlogBase):
     id: int
-    slug: str # Slug is always present after creation
-    publication_date: datetime
+    slug: str
+    # publication_date is already here
     last_updated: datetime
 
     class Config:
-        orm_mode = True # Enables Pydantic to read ORM models
+        orm_mode = True
 
-# Admin User Schemas
+# Admin User Schemas (no changes)
 class AdminUserBase(BaseModel):
     username: str
     email: EmailStr
@@ -48,7 +49,7 @@ class AdminUser(AdminUserBase):
     class Config:
         orm_mode = True
 
-# Authentication Schemas
+# Authentication Schemas (no changes)
 class Token(BaseModel):
     access_token: str
     token_type: str

@@ -92,7 +92,6 @@ def admin_login(user_credentials: schemas.AdminUserLogin, db: Session = Depends(
 
 
 # --- Admin Blog Management Endpoints (Protected) ---
-
 @app.post("/api/admin/blogs", response_model=schemas.Blog, status_code=status.HTTP_201_CREATED)
 def create_blog_post(blog: schemas.BlogCreate, db: Session = Depends(get_db),
                      current_user: models.AdminUser = Depends(auth.get_current_admin_user)):
@@ -101,15 +100,19 @@ def create_blog_post(blog: schemas.BlogCreate, db: Session = Depends(get_db),
     """
     if not blog.slug:
         blog.slug = slugify(blog.title) # Generate slug from title if not provided
-        if not blog.slug: # Fallback if title is empty/cannot be slugified
+        if not blog.slug:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Title or slug must be provided.")
 
-    # Ensure slug uniqueness
     existing_blog = db.query(models.Blog).filter(models.Blog.slug == blog.slug).first()
     if existing_blog:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A blog with this slug already exists.")
 
+    # --- NO CHANGE NEEDED HERE ---
+    # blog.dict() will include publication_date if it was set in the schema,
+    # otherwise, models.py default will kick in.
     db_blog = models.Blog(**blog.dict())
+    # --- END NO CHANGE ---
+
     db.add(db_blog)
     db.commit()
     db.refresh(db_blog)
@@ -145,13 +148,12 @@ def update_blog_post(blog_id: int, blog_update: schemas.BlogUpdate, db: Session 
     if db_blog is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found")
 
-    update_data = blog_update.dict(exclude_unset=True) # Only update provided fields
+    update_data = blog_update.dict(exclude_unset=True)
 
     if 'title' in update_data and 'slug' not in update_data:
-        update_data['slug'] = slugify(update_data['title']) # Auto-update slug if title changes
+        update_data['slug'] = slugify(update_data['title'])
 
     if 'slug' in update_data and update_data['slug'] != db_blog.slug:
-        # Check for slug uniqueness if slug is being changed
         existing_blog_with_new_slug = db.query(models.Blog).filter(models.Blog.slug == update_data['slug'], models.Blog.id != blog_id).first()
         if existing_blog_with_new_slug:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A blog with this slug already exists.")
@@ -159,7 +161,7 @@ def update_blog_post(blog_id: int, blog_update: schemas.BlogUpdate, db: Session 
     for key, value in update_data.items():
         setattr(db_blog, key, value)
 
-    db.add(db_blog) # Re-add to session for update tracking
+    db.add(db_blog)
     db_blog.last_updated = func.now() # Manually update last_updated
     db.commit()
     db.refresh(db_blog)
